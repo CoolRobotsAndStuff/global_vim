@@ -1,0 +1,224 @@
+# i3 config file (v4)
+# See https://i3wm.org/docs/userguide.html
+
+# --------------- ______________________ ---------------
+# ---------------[ Global Vim Emulation ]---------------
+# --------------- ^^^^^^^^^^^^^^^^^^^^^^ ---------------
+
+# This is a file written purely in the i3 configuration language to mimic vim motions at a global level.
+# It works by simulating inputs in your system with the program of your choice, using the available tools for text editing like the End, Home and arrow keys.
+#This relies on the program that you might be running being able to interpret these hotkeys. Luckily, most do! This way you are able to use vim motions in any program, without having to install any plugins.
+
+# To use it, just copy-paste it into your i3 config. It only depends on the $mod variable being defined.
+# You can edit the CONFIG section below to customize to your liking.
+# I haven't tested this standard config thoroughly, because it's not the one I use. If you find any mistakes you can report an issue and I'll fix it. 
+
+# The fact that it's written as a plain config makes it relatively easy to edit, if a bit repetitive and tedious. You are welcome to add in your favourite keybindings that may be missing.
+
+# ----------------------[ CONFIG ]----------------------
+
+# Mode names
+set      $normal_mode "Vim Mode - Normal"
+set      $visual_mode "Vim Mode - Visual"
+set $visual_line_mode "Vim Mode - Visual Line"
+set      $insert_mode "Vim Mode - Insert"
+
+# Auxiliary modes to simulate basic motions
+set      $delete_mode "Vim Mode - d"
+set         $cut_mode "Vim Mode - x"
+set        $yank_mode "Vim Mode - y"
+set     $replace_mode "Vim Mode - c"
+
+# Command used to simulate input
+set $pk xdotool key
+set $pknomods xdotool key --clearmodifiers
+
+# --( Keymaps )--
+
+# $mod + this key will activate vim mode.
+# To exit use the esc key while in normal mode
+# Feel free to change how entering and exiting works in the config below.
+set $activate_vim_mode v
+set $esc Escape
+
+# Movement
+set $h h
+set $l l
+set $j j
+set $k k
+
+set $e e
+set $b b
+
+set $dollar dollar
+set $0 0
+
+
+# Keys for the different modes (Learned the hard way that variables in i3 are case insensitive)
+set $i i
+set $v v
+set $_upper_v Shift+v
+
+# Paste
+set $p p
+set $upper_p Shift+p
+
+# Copy / Yank
+set $y y
+set $upper_y Shift+y
+
+# Delete and copy to clipboard (cut)
+set $d d
+set $upper_d Shift+d
+
+# Delete without copying to clipboard -- Unmapped by default
+set $_d _ 
+set $_upper_d _
+
+# Replace
+set $c c
+set $upper_c Shift+c
+
+# New line
+set $o o
+set $upper_o Shift+o
+ 
+set $undo u
+set $redo Ctrl+r
+
+
+# -------------------[ END OF CONFIG ]-------------------
+
+mode $insert_mode {
+    bindsym Return --release    exec --no-startup-id $pk Shift+Return
+    bindsym $esc                mode $normal_mode
+}
+
+mode $visual_line_mode {
+    bindsym $j --release        exec --no-startup-id $pk shift+Down && $pk shift+End
+    bindsym $k --release        exec --no-startup-id $pk shift+Up   && $pk shift+Home
+    bindsym $esc --release      exec --no-startup-id $pk Left, mode $normal_mode
+}
+
+mode $visual_mode {
+    bindsym $h --release        exec --no-startup-id $pk shift+Left
+    bindsym $l --release        exec --no-startup-id $pk shift+Right
+    bindsym $j --release        exec --no-startup-id $pk shift+Down
+    bindsym $k --release        exec --no-startup-id $pk shift+Up
+    bindsym $e --release        exec --no-startup-id $pk shift+ctrl+Right
+    bindsym $b --release        exec --no-startup-id $pk shift+ctrl+Left
+    bindsym $dollar --release   exec --no-startup-id $pk shift+End
+    bindsym $0 --release        exec --no-startup-id $pk shift+Home
+    
+    bindsym $p --release        exec --no-startup-id $pk ctrl+v, mode $normal_mode
+    bindsym $d --release        exec --no-startup-id $pk ctrl+x, mode $normal_mode
+    bindsym $y --release        exec --no-startup-id $pk ctrl+c, mode $normal_mode
+    bindsym $_d --release       exec --no-startup-id $pk BackSpace, mode $normal_mode
+    bindsym $c --release        exec --no-startup-id $pk BackSpace, mode $insert_mode
+
+    bindsym $undo --release     exec --no-startup-id $pk ctrl+z
+    bindsym $redo --release     exec --no-startup-id $pk ctrl+y
+    
+    bindsym $esc  --release     exec --no-startup-id $pk Left, mode $normal_mode
+}
+
+mode $delete_mode {
+    bindsym $h --release        exec --no-startup-id $pk BackSpace, mode $normal_mode
+    bindsym $l --release        exec --no-startup-id $pk Delete,    mode $normal_mode
+    bindsym $e --release        exec --no-startup-id $pk shift+ctrl+Right && $pk BackSpace, mode $normal_mode
+    bindsym $b --release        exec --no-startup-id $pk shift+ctrl+Left  && $pk BackSpace, mode $normal_mode
+    bindsym $dollar --release   exec --no-startup-id $pk shift+End        && $pk BackSpace, mode $normal_mode
+    bindsym $0 --release        exec --no-startup-id $pk shift+Home       && $pk BackSpace, mode $normal_mode
+
+    bindsym $_d --release       exec --no-startup-id $pk Home      \
+                                                  && $pk shift+End \
+                                                  && $pk BackSpace, mode $normal_mode
+    bindsym $esc                mode $normal_mode
+}
+
+mode $yank_mode {
+    bindsym $h --release        exec --no-startup-id $pk shift+Left       && $pk ctrl+c && $pk Left, mode $normal_mode
+    bindsym $l --release        exec --no-startup-id $pk shift+Right      && $pk ctrl+c && $pk Left, mode $normal_mode
+    bindsym $e --release        exec --no-startup-id $pk shift+ctrl+Right && $pk ctrl+c && $pk Left, mode $normal_mode
+    bindsym $b --release        exec --no-startup-id $pk shift+ctrl+Left  && $pk ctrl+c && $pk Left, mode $normal_mode
+    bindsym $dollar --release   exec --no-startup-id $pk shift+End        && $pk ctrl+c && $pk Left, mode $normal_mode
+    bindsym $0 --release        exec --no-startup-id $pk shift+Home       && $pk ctrl+c && $pk Left, mode $normal_mode
+
+    bindsym $y --release        exec --no-startup-id $pk Home      \
+                                                  && $pk shift+End \
+                                                  && $pk ctrl+c, mode $normal_mode
+    bindsym $esc                mode $normal_mode
+}
+
+mode $cut_mode {
+    bindsym $h --release        exec --no-startup-id $pk shift+Left       && $pk ctrl+x, mode $normal_mode
+    bindsym $l --release        exec --no-startup-id $pk shift+Right      && $pk ctrl+x, mode $normal_mode
+    bindsym $e --release        exec --no-startup-id $pk shift+ctrl+Right && $pk ctrl+x, mode $normal_mode
+    bindsym $b --release        exec --no-startup-id $pk shift+ctrl+Left  && $pk ctrl+x, mode $normal_mode
+    bindsym $dollar --release   exec --no-startup-id $pk shift+End        && $pk ctrl+x, mode $normal_mode
+    bindsym $0 --release        exec --no-startup-id $pk shift+Home       && $pk ctrl+x, mode $normal_mode
+
+    bindsym $d --release        exec --no-startup-id $pk Home      \
+                                                  && $pk shift+End \
+                                                  && $pk ctrl+x, mode $normal_mode
+    bindsym $esc                mode $normal_mode
+}
+
+mode $replace_mode {
+    bindsym $h --release        exec --no-startup-id $pk BackSpace, mode $insert_mode
+    bindsym $l --release        exec --no-startup-id $pk Delete,    mode $insert_mode
+    bindsym $e --release        exec --no-startup-id $pk shift+ctrl+Right && $pk BackSpace, mode $insert_mode
+    bindsym $b --release        exec --no-startup-id $pk shift+ctrl+Left  && $pk BackSpace, mode $insert_mode
+    bindsym $dollar --release   exec --no-startup-id $pk shift+End        && $pk BackSpace, mode $insert_mode
+    bindsym $0 --release        exec --no-startup-id $pk shift+Home       && $pk BackSpace, mode $insert_mode
+
+    bindsym $c --release        exec --no-startup-id $pk Home      \
+                                                  && $pk shift+End \
+                                                  && $pk BackSpace, mode $insert_mode
+    bindsym $esc                mode $normal_mode
+}
+
+mode $normal_mode {
+    # Vim like movement
+    bindsym $h --release        exec --no-startup-id $pk Left
+    bindsym $l --release        exec --no-startup-id $pk Right
+    bindsym $j --release        exec --no-startup-id $pk Down
+    bindsym $k --release        exec --no-startup-id $pk Up
+    bindsym $e --release        exec --no-startup-id $pk ctrl+Right
+    bindsym $b --release        exec --no-startup-id $pk ctrl+Left
+    bindsym $dollar --release   exec --no-startup-id $pk End
+    bindsym $0 --release        exec --no-startup-id $pk Home
+   
+    bindsym $upper_p --release  exec --no-startup-id $pk Left && $pk ctrl+v
+    bindsym $p --release        exec --no-startup-id $pk ctrl+v
+
+    bindsym $upper_d --release  exec --no-startup-id $pk shift+End && $pk ctrl+x
+    bindsym $d --release        mode $cut_mode
+
+    bindsym $upper_y --release  exec --no-startup-id $pk shift+End && $pk ctrl+c && $pk Left
+    bindsym $y --release        mode $yank_mode
+
+    bindsym $_upper_d --release exec --no-startup-id $pk shift+End && $pk BackSpace
+    bindsym $_d --release       mode $delete_mode
+
+    bindsym $upper_c --release  exec --no-startup-id $pk shift+End && $pk BackSpace, mode $insert_mode
+    bindsym $c                  mode $delete_mode
+
+    bindsym $o --release        exec --no-startup-id $pk End && $pk shift+Return, mode $insert_mode
+    bindsym $upper_o --release  exec --no-startup-id $pk Home && $pk shift+Return && $pk Up, mode $insert_mode
+
+    bindsym $undo --release     exec --no-startup-id $pk ctrl+z
+    bindsym $redo --release     exec --no-startup-id $pk ctrl+y
+
+    bindsym $esc                mode $normal_mode
+    bindsym $i                  mode $insert_mode
+    bindsym $a --release        exec --no-startup-id $pk Right, mode $insert_mode
+    bindsym $_upper_v --release exec --no-startup-id $pknomods End && $pk shift+Home, mode $visual_line_mode
+    bindsym $v --release        mode $visual_mode
+}
+
+bindsym $mod+$activate_vim_mode mode $normal_mode
+
+# ------------------  _____________________________ -------------------
+# -------------------[ End of Global Vim Emulation ]-------------------
+# ------------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -------------------
